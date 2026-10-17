@@ -1,19 +1,27 @@
 # PLAYBOX
 
-A high-performance, minimalist LAN video streaming server built with **100% Rust Standard Library (`std`)** — **zero external crates or dependencies**.
+A high-performance, minimalist LAN video streaming server built with **100% Rust Standard Library (`std`)** — **zero external dependencies**.
 
 ---
 
 ## Features
 
-- **Zero Crates / Zero Dependencies**: Pure Rust `std` only. Compiles directly with `rustc -O main.rs -o playbox`.
+- **Zero Crates / Zero Dependencies**: Pure Rust `std` only. Compiles directly with `cargo build --release`.
 - **Drop & Run**: Place the standalone binary `playbox` in any folder, or put it in your system `$PATH` (`/usr/local/bin`) to stream any directory with `playbox .`.
-- **Automatic LAN IP Discovery**: Detects your machine's local Wi-Fi / Ethernet IP using zero-packet kernel socket routing so any phone, tablet, or laptop on the same network can connect.
+- **Automatic LAN IP Discovery & Terminal QR**: Detects your machine's local Wi-Fi / Ethernet IP using zero-packet kernel socket routing and renders a scan-ready QR code right in your terminal.
 - **Port Auto-Fallback**: Defaults to port `8080`, and automatically increments (`8081`...`8105`) if occupied.
-- **HTTP 206 Partial Content (Range Requests)**: Native RFC 7233 byte-range streaming for seeking and scrubbing without buffering the full file into memory.
+- **RFC 7233 Byte-Range Streaming**: Native HTTP 206 Partial Content support for instantaneous video scrubbing and seeking.
+- **Companion Subtitle Support (.srt / .vtt)**:
+  - Automatically pairs `.srt` and `.vtt` subtitles matching the video file stem (e.g. `Movie.en.srt`, `Movie_fa.vtt`).
+  - Converts `.srt` subtitles to WebVTT on the fly for native browser `<track>` playback.
+  - Video cards display a sleek `[CC]` badge when subtitles are available.
+- **Optional LAN PIN Authentication**:
+  - Protect shared dorms, offices, or home networks with `--pin <CODE>`.
+  - Authenticates via session cookie, `X-Playbox-PIN` header, or URL parameter.
 - **Thumbnail Generation**:
   - **Server-side**: Automatically invokes system `ffmpeg` (cached in a hidden `.playbox_thumbs/` directory).
-  - **Client-side Fallback**: If `ffmpeg` is absent, the browser captures the first frame using an HTML5 `<canvas>` snapshot.
+  - **Client-side Fallback**: If `ffmpeg` is absent, the browser extracts frames using an HTML5 `<canvas>` snapshot.
+- **UPnP / DLNA Local Discovery**: Built-in SSDP responder on UDP port 1900 with ContentDirectory and ConnectionManager XML services for smart TVs and VLC.
 - **Minimalist Black & White UI**:
   - Pure `#000000` monochrome aesthetic with **JetBrains Mono** typography.
   - Smooth lazy loading with blur-up fade-in transitions via `IntersectionObserver`.
@@ -31,28 +39,38 @@ A high-performance, minimalist LAN video streaming server built with **100% Rust
 
 ## Quick Start
 
-### 1. Run the pre-compiled binary
+### 1. Build and Run
 ```bash
-# Stream current folder on default port 8080:
-./playbox
+# Clone the repository
+git clone https://github.com/SoroushMB/Playbox.git
+cd Playbox
 
-# Or stream a specific folder / port:
-./playbox /path/to/movies 3000
+# Build release binary
+cargo build --release
+
+# Run on current directory (port 8080)
+cargo run --release
+
+# Or run with custom directory, port, or PIN:
+cargo run --release -- /path/to/movies 9000 --pin 1234
 ```
 
 ### 2. Make it globally accessible anywhere
 ```bash
-sudo cp playbox /usr/local/bin/
+cargo install --path .
 ```
 Now, simply `cd` into any folder with videos and run:
 ```bash
 playbox
 ```
 
-### 3. Recompiling from source
-No `cargo` needed:
-```bash
-rustc -O main.rs -o playbox && strip playbox
+### 3. Usage Options
+```text
+USAGE:
+  playbox [OPTIONS] [DIR] [PORT]
+
+OPTIONS:
+  -p, --port <PORT>         Port to bind (default: 8080, with fallback)
+      --pin <CODE>          Require PIN authentication for web access
+  -h, --help                Show this help message
 ```
-Binary size is only **~575 KB** with all HTML, CSS, and client-side JavaScript embedded inside.
-# Playbox
