@@ -1,0 +1,11 @@
+# Binaries & build artifacts
+playbox
+*.exe
+*.o
+*.so
+*.dylib
+target/
+
+# Local cache & thumbnails
+.playbox_thumbs/
+.DS_Store
